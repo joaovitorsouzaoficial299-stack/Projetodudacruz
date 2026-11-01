@@ -262,4 +262,4 @@
  loadPublicGallery().catch(()=>{});
 })();
 </script>
-<script>const menu=document.getElementById('menu'),links=document.getElementById('links');menu.addEventListener('click',()=>links.classList.toggle('open'));links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>links.classList.remove('open')));document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.gallery-item').forEach(i=>i.classList.toggle('hide',b.dataset.filter!=='all'&&i.dataset.kind!==b.dataset.filter)) }));</script></body></html>
+<script>const menu=document.getElementById('menu'),links=document.getElementById('links');menu.addEventListener('click',()=>links.classList.toggle('open'));links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>links.classList.remove('open')));</script></body></html>
