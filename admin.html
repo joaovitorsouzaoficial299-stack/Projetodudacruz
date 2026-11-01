@@ -26,10 +26,10 @@
     <div class="field"><label for="serviceDuration">Duração em minutos</label><input id="serviceDuration" type="number" min="5" max="480" required value="30"></div>
     <div class="field"><label for="serviceDurability">Durabilidade do resultado</label><input id="serviceDurability" placeholder="Ex.: depende dos cuidados e crescimento dos fios"></div>
    </div>
-   <div class="field"><label for="serviceShort">Resumo curto</label><input id="serviceShort" maxlength="180"></div>
+   
    <div class="field"><label for="serviceDescription">Descrição para a cliente</label><textarea id="serviceDescription"></textarea></div>
    <div class="field"><label for="serviceHow">Como o procedimento é feito</label><textarea id="serviceHow"></textarea></div>
-   <div class="field"><label for="serviceImage">Foto do procedimento (opcional)</label><input id="serviceImage" type="file" accept="image/jpeg,image/png,image/webp"></div>
+   <div class="field"><label for="serviceImages">Fotos do procedimento (opcional — pode selecionar várias)</label><input id="serviceImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><div id="serviceImageList" class="row"></div></div>
    <div class="row"><button class="btn" type="submit" id="saveService">Salvar procedimento</button><button class="btn secondary" type="button" id="resetService">Limpar</button></div>
   </form><div id="serviceList" class="list"></div>
  </section>
@@ -66,30 +66,38 @@
  async function upload(file,folder){const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=folder+'/'+crypto.randomUUID()+'.'+ext;const {error}=await db.storage.from('duda-beauty').upload(path,file,{upsert:false,contentType:file.type});if(error)throw error;return db.storage.from('duda-beauty').getPublicUrl(path).data.publicUrl;}
  function item(title,detail,buttons){const el=document.createElement('div');el.className='item';const left=document.createElement('div');left.innerHTML='<strong>'+escapeHtml(title)+'</strong><p>'+escapeHtml(detail)+'</p>';const right=document.createElement('div');right.className='actions';buttons.forEach(b=>right.appendChild(b));el.append(left,right);return el;}
  function action(label,handler,kind='secondary'){const b=document.createElement('button');b.type='button';b.className='btn '+kind;b.textContent=label;b.addEventListener('click',handler);return b;}
- function resetService(){$('serviceForm').reset();$('serviceId').value='';$('serviceDuration').value=30;$('saveService').textContent='Salvar procedimento';}
+ function resetService(){$('serviceForm').reset();$('serviceId').value='';$('serviceDuration').value=30;$('serviceImageList').innerHTML='';$('saveService').textContent='Salvar procedimento';}
  $('resetService').addEventListener('click',resetService);
  $('serviceForm').addEventListener('submit',async e=>{
-  e.preventDefault();const id=$('serviceId').value;const file=$('serviceImage').files[0];let image_url=null;
-  try{if(file)image_url=await upload(file,'services');const row={name:$('serviceName').value.trim(),short_description:$('serviceShort').value.trim(),description:$('serviceDescription').value.trim(),procedure_details:$('serviceHow').value.trim(),duration_minutes:Number($('serviceDuration').value),durability:$('serviceDurability').value.trim(),price:$('servicePrice').value===''?null:Number($('servicePrice').value),updated_at:new Date().toISOString()};if(image_url)row.image_url=image_url;
-   const q=id?db.from('services').update(row).eq('id',id):db.from('services').insert(row);const {error}=await q;if(error)throw error;resetService();await loadServices();message(appMessage,'Procedimento salvo com sucesso.');
+  e.preventDefault();const id=$('serviceId').value;const files=Array.from($('serviceImages').files||[]);
+  try{
+   const row={name:$('serviceName').value.trim(),description:$('serviceDescription').value.trim(),procedure_details:$('serviceHow').value.trim(),duration_minutes:Number($('serviceDuration').value),durability:$('serviceDurability').value.trim(),price:$('servicePrice').value===''?null:Number($('servicePrice').value),updated_at:new Date().toISOString()};
+   let serviceId=id;
+   if(id){const {error}=await db.from('services').update(row).eq('id',id);if(error)throw error;}
+   else{const {data,error}=await db.from('services').insert(row).select('id').single();if(error)throw error;serviceId=data.id;}
+   for(let i=0;i<files.length;i++){const image_url=await upload(files[i],'services');const {error}=await db.from('service_images').insert({service_id:serviceId,image_url,sort_order:i});if(error)throw error;}
+   resetService();await loadServices();message(appMessage,'Procedimento salvo com sucesso.');
   }catch(err){message(appMessage,'Erro ao salvar procedimento: '+err.message,true);}
  });
  async function loadServices(){
-  const {data,error}=await db.from('services').select('*').order('sort_order').order('name');if(error)throw error;
+  const [{data,error},{data:images,error:imageError}]=await Promise.all([
+   db.from('services').select('*').order('sort_order').order('name'),
+   db.from('service_images').select('*').order('sort_order').order('created_at')
+  ]);if(error)throw error;if(imageError)throw imageError;
   const host=$('serviceList');host.innerHTML='';
   (data||[]).forEach(s=>{
+   const pics=(images||[]).filter(x=>x.service_id===s.id);
    const wrap=document.createElement('div');wrap.className='item';
-   if(s.image_url){const img=document.createElement('img');img.className='preview';img.src=s.image_url;img.alt=s.name;wrap.appendChild(img);}
-   const info=document.createElement('div');info.style.flex='1';info.innerHTML='<strong>'+escapeHtml(s.name)+'</strong><p>'+(s.price===null?'Valor a definir':Number(s.price).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}))+' · '+s.duration_minutes+' min · '+(s.active?'Publicado':'Oculto')+'</p>';
+   const thumbs=document.createElement('div');thumbs.className='row';
+   pics.forEach(p=>{const img=document.createElement('img');img.className='preview';img.src=p.image_url;img.alt=s.name;thumbs.appendChild(img);});
+   const info=document.createElement('div');info.style.flex='1';info.innerHTML='<strong>'+escapeHtml(s.name)+'</strong><p>'+(s.price===null?'Valor a definir':Number(s.price).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}))+' · '+s.duration_minutes+' min · '+(s.active?'Publicado':'Oculto')+' · '+pics.length+' foto(s)</p>';
    const buttons=document.createElement('div');buttons.className='actions';
    buttons.append(
-    action('Editar',()=>{$('serviceId').value=s.id;$('serviceName').value=s.name;$('servicePrice').value=s.price??'';$('serviceDuration').value=s.duration_minutes;$('serviceDurability').value=s.durability;$('serviceShort').value=s.short_description;$('serviceDescription').value=s.description;$('serviceHow').value=s.procedure_details;$('saveService').textContent='Atualizar procedimento';window.scrollTo({top:0,behavior:'smooth'});}),
+    action('Editar',()=>{$('serviceId').value=s.id;$('serviceName').value=s.name;$('servicePrice').value=s.price??'';$('serviceDuration').value=s.duration_minutes;$('serviceDurability').value=s.durability||'';$('serviceDescription').value=s.description||'';$('serviceHow').value=s.procedure_details||'';$('serviceImages').value='';$('serviceImageList').innerHTML='';pics.forEach(p=>{const box=document.createElement('div');box.style.position='relative';const img=document.createElement('img');img.className='preview';img.src=p.image_url;const del=action('×',async()=>{if(!confirm('Remover esta imagem?'))return;const {error}=await db.from('service_images').delete().eq('id',p.id);if(error)message(appMessage,error.message,true);else{box.remove();loadServices();}},'danger');box.append(img,del);$('serviceImageList').appendChild(box);});$('saveService').textContent='Atualizar procedimento';window.scrollTo({top:0,behavior:'smooth'});}),
     action(s.active?'Ocultar':'Publicar',async()=>{const result=await db.from('services').update({active:!s.active}).eq('id',s.id);if(result.error)message(appMessage,result.error.message,true);else loadServices();}),
-    action('Trocar foto',()=>{$('serviceId').value=s.id;$('serviceName').value=s.name;$('servicePrice').value=s.price??'';$('serviceDuration').value=s.duration_minutes;$('serviceDurability').value=s.durability;$('serviceShort').value=s.short_description;$('serviceDescription').value=s.description;$('serviceHow').value=s.procedure_details;$('serviceImage').click();}),
-    action('Remover foto',async()=>{if(!s.image_url||!confirm('Remover a foto deste procedimento?'))return;const result=await db.from('services').update({image_url:null}).eq('id',s.id);if(result.error)message(appMessage,result.error.message,true);else loadServices();},'danger'),
     action('Excluir',async()=>{if(!confirm('Excluir este procedimento?'))return;const result=await db.from('services').delete().eq('id',s.id);if(result.error)message(appMessage,result.error.message,true);else loadServices();},'danger')
    );
-   wrap.append(info,buttons);host.appendChild(wrap);
+   wrap.append(thumbs,info,buttons);host.appendChild(wrap);
   });
  }
  async function loadHours(){
