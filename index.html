@@ -102,129 +102,119 @@
 <footer class="footer"><div class="wrap"><div class="footer-grid"><div><a class="brand" href="#inicio"><span class="brandmark">dc</span><span class="brandname">Duda Cruz Beauty<small>SOBRANCELHAS & CÍLIOS</small></span></a><p>Especializada em sobrancelhas, cílios e cuidados que valorizam sua beleza natural.</p><div class="social"><a href="https://www.instagram.com/dudacruzbeauty_/" target="_blank" rel="noopener">ig</a><a href="https://wa.me/5562994610050" target="_blank" rel="noopener">dm</a></div></div><div><h4>Navegação</h4><ul><li><a href="#inicio">Início</a></li><li><a href="#sobre">Sobre</a></li><li><a href="#servicos">Serviços</a></li><li><a href="#galeria">Resultados</a></li></ul></div><div><h4>Cuidados</h4><ul><li>Sobrancelhas</li><li>Cílios</li><li>Beleza natural</li><li>Autoestima</li></ul></div><div><h4>Contato</h4><ul><li>Instagram: @dudacruzbeauty_</li><li>Agendamentos pelo WhatsApp</li><li>Consulte disponibilidade</li></ul></div></div><div class="copyright"><span>© 2026 Duda Cruz Beauty. Todos os direitos reservados.</span><span>Atendimento com delicadeza, capricho e autoestima.</span></div></div></footer>
 <dialog class="booking-modal" id="bookingModal" aria-labelledby="bookingTitle">
  <div class="booking-modal-inner">
-  <div class="booking-modal-head">
-   <div><span class="eyebrow">AGENDAMENTO ONLINE</span><h2 id="bookingTitle">Reserve seu momento.</h2></div>
-   <button class="booking-close" type="button" id="bookingClose" aria-label="Fechar">×</button>
-  </div>
-  <div class="booking-progress" id="bookingProgress" aria-label="Progresso do agendamento"><span class="active"></span><span></span><span></span><span></span></div>
-  <section class="booking-step" data-step="0">
-   <h3>O que você deseja fazer?</h3>
-   <p class="booking-hint">Escolha o cuidado que combina com você.</p>
-   <div class="booking-options" id="bookingServices">
-    <button class="booking-option" type="button" data-service="Design de sobrancelhas"><strong>Design de sobrancelhas</strong><small>Modelagem e definição dos fios</small></button>
-    <button class="booking-option" type="button" data-service="Manutenção de sobrancelhas"><strong>Manutenção de sobrancelhas</strong><small>Manutenção do desenho</small></button>
-    <button class="booking-option" type="button" data-service="Design personalizado"><strong>Design personalizado</strong><small>Harmonia com seus traços</small></button>
-    <button class="booking-option" type="button" data-service="Cuidados com cílios"><strong>Cuidados com cílios</strong><small>Realce complementar do olhar</small></button>
-    <button class="booking-option" type="button" data-service="Outro atendimento"><strong>Outro atendimento</strong><small>Consulte os cuidados disponíveis</small></button>
-    
-    
-    
-    <button class="booking-option" type="button" data-service="Design de sobrancelhas"><strong>Sobrancelhas com henna</strong><small>Definição com efeito preenchido</small></button>
-   </div>
-   <p class="booking-error" id="bookingError0"></p>
-  </section>
-  <section class="booking-step" data-step="1" hidden>
-   <h3>Escolha a data e o horário</h3>
-   <p class="booking-hint">Indique sua preferência; a disponibilidade será confirmada pela Duda.</p>
-   <label class="booking-field"><span>Data desejada</span><input id="bookingDate" type="date"></label>
-   <div class="booking-slots" id="bookingSlots"></div>
-   <p class="booking-error" id="bookingError1"></p>
-   <div class="booking-notice">Demonstração interativa: os horários são apenas sugestões. A disponibilidade será confirmada diretamente com a Duda pelo Instagram.</div>
-  </section>
-  <section class="booking-step" data-step="2" hidden>
-   <h3>Como podemos chamar você?</h3>
-   <p class="booking-hint">Preencha seus dados para enviar o pedido de agendamento.</p>
-   <label class="booking-field"><span>Seu nome</span><input id="bookingName" type="text" autocomplete="name" placeholder="Digite seu nome"></label>
-   <label class="booking-field"><span>WhatsApp</span><input id="bookingPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(00) 00000-0000"></label>
-   <p class="booking-error" id="bookingError2"></p>
-  </section>
-  <section class="booking-step" data-step="3" hidden>
-   <h3>Confira seu pedido</h3>
-   <p class="booking-hint">Confira seus dados antes de enviar a solicitação pelo WhatsApp.</p>
-   <div class="booking-summary">
-    <div><span>Procedimento</span><strong id="summaryService">—</strong></div>
-    <div><span>Data</span><strong id="summaryDate">—</strong></div>
-    <div><span>Horário</span><strong id="summaryTime">—</strong></div>
-    <div><span>Nome</span><strong id="summaryName">—</strong></div>
-    <div><span>WhatsApp</span><strong id="summaryPhone">—</strong></div>
-   </div>
-   <div class="booking-notice">Ao tocar em “Enviar solicitação”, o WhatsApp da Duda será aberto com os dados preenchidos. O horário só fica confirmado após a resposta dela.</div>
-  </section>
-  <div class="booking-actions">
-   <button class="booking-back" type="button" id="bookingBack" hidden>← Voltar</button>
-   <button class="btn" type="button" id="bookingNext">Continuar →</button>
-  </div>
+  <div class="booking-modal-head"><div><span class="eyebrow">AGENDAMENTO ONLINE</span><h2 id="bookingTitle">Reserve seu momento.</h2></div><button class="booking-close" type="button" id="bookingClose" aria-label="Fechar">×</button></div>
+  <div class="booking-progress" id="bookingProgress"><span class="active"></span><span></span><span></span><span></span></div>
+  <section class="booking-step" data-step="0"><h3>O que você deseja fazer?</h3><p class="booking-hint">Escolha um dos procedimentos disponíveis.</p><div class="booking-options" id="bookingServices"><p class="booking-hint">Carregando procedimentos...</p></div><p class="booking-error" id="bookingError0"></p></section>
+  <section class="booking-step" data-step="1" hidden><h3>Escolha a data e o horário</h3><p class="booking-hint">Você verá somente os horários que estiverem disponíveis.</p><label class="booking-field"><span>Data desejada</span><input id="bookingDate" type="date"></label><div class="booking-slots" id="bookingSlots"></div><p class="booking-error" id="bookingError1"></p></section>
+  <section class="booking-step" data-step="2" hidden><h3>Seus dados</h3><p class="booking-hint">Informe como a Duda pode entrar em contato com você.</p><label class="booking-field"><span>Seu nome</span><input id="bookingName" type="text" autocomplete="name" placeholder="Digite seu nome"></label><label class="booking-field"><span>WhatsApp</span><input id="bookingPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(00) 00000-0000"></label><p class="booking-error" id="bookingError2"></p></section>
+  <section class="booking-step" data-step="3" hidden><h3>Confira seu agendamento</h3><p class="booking-hint">Confira os dados antes de confirmar.</p><div class="booking-summary"><div><span>Procedimento</span><strong id="summaryService">—</strong></div><div><span>Data</span><strong id="summaryDate">—</strong></div><div><span>Horário</span><strong id="summaryTime">—</strong></div><div><span>Duração</span><strong id="summaryDuration">—</strong></div><div><span>Valor</span><strong id="summaryPrice">—</strong></div><div><span>Nome</span><strong id="summaryName">—</strong></div></div><div class="booking-notice">Seu pedido será registrado no site. A Duda poderá acompanhar e confirmar o agendamento.</div></section>
+  <div class="booking-actions"><button class="booking-back" type="button" id="bookingBack" hidden>← Voltar</button><button class="btn" type="button" id="bookingNext">Continuar →</button></div>
  </div>
-</dialog><script>
+</dialog>
+<dialog class="booking-modal" id="serviceModal" aria-labelledby="serviceModalTitle">
+ <div class="booking-modal-inner"><div class="booking-modal-head"><div><span class="eyebrow">CONHEÇA O PROCEDIMENTO</span><h2 id="serviceModalTitle">Procedimento</h2></div><button class="booking-close" type="button" id="serviceModalClose" aria-label="Fechar">×</button></div>
+ <img id="serviceModalImage" alt="" style="width:100%;height:210px;object-fit:cover;margin-bottom:18px;display:none">
+ <p id="serviceModalDescription" class="booking-hint"></p>
+ <div class="booking-summary"><div><span>Como é feito</span><strong id="serviceModalHow">Consulte a profissional</strong></div><div><span>Duração</span><strong id="serviceModalDuration">A definir</strong></div><div><span>Durabilidade</span><strong id="serviceModalDurability">A definir</strong></div><div><span>Valor</span><strong id="serviceModalPrice">Consulte</strong></div></div>
+ <div class="booking-actions" style="flex-wrap:wrap"><button class="btn light" type="button" id="serviceWhatsApp">Agendar pelo WhatsApp</button><button class="btn" type="button" id="serviceBook">Agendar pelo site</button></div>
+ </div>
+</dialog><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
 (function(){
- const dialog=document.getElementById('bookingModal');
- if(!dialog)return;
- const state={step:0,service:'',date:'',time:'',name:'',phone:''};
- const steps=[...dialog.querySelectorAll('.booking-step')];
- const bars=[...document.querySelectorAll('#bookingProgress span')];
- const next=document.getElementById('bookingNext');
- const back=document.getElementById('bookingBack');
- const dateInput=document.getElementById('bookingDate');
- const slots=document.getElementById('bookingSlots');
- const error=[0,1,2].map(i=>document.getElementById('bookingError'+i));
+ const SUPABASE_URL='https://haytimlsdmjzjxvtlagn.supabase.co';
+ const SUPABASE_KEY='sb_publishable_GbMEDrsO9ZniFqARV4IOoA_WEzhYqGj';
+ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const whatsapp='5562994610050';
- function localDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
- function formatDate(v){if(!v)return '—';const p=v.split('-');return new Date(Number(p[0]),Number(p[1])-1,Number(p[2])).toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})}
- function renderSlots(){
-  slots.innerHTML='';state.time='';
-  if(!dateInput.value)return;
-  const day=new Date(dateInput.value+'T12:00:00').getDay();
-  /* A disponibilidade será confirmada diretamente com a profissional. */
-  ['09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'].forEach(t=>{
-   const b=document.createElement('button');b.type='button';b.className='booking-slot';b.textContent=t;
-   b.addEventListener('click',()=>{state.time=t;slots.querySelectorAll('.booking-slot').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');error[1].textContent=''});
-   slots.appendChild(b);
-  });
+ const booking=document.getElementById('bookingModal');
+ const serviceDialog=document.getElementById('serviceModal');
+ const state={step:0,service:null,date:'',time:'',name:'',phone:''};
+ const steps=[...booking.querySelectorAll('.booking-step')];
+ const bars=[...document.querySelectorAll('#bookingProgress span')];
+ const next=document.getElementById('bookingNext'),back=document.getElementById('bookingBack');
+ const dateInput=document.getElementById('bookingDate'),slots=document.getElementById('bookingSlots');
+ const errors=[0,1,2].map(i=>document.getElementById('bookingError'+i));
+ let services=[];
+ const money=v=>v===null||v===undefined?'A consultar':Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+ const dateLabel=v=>{if(!v)return '—';const [y,m,d]=v.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});};
+ const durationLabel=v=>v? v+' minutos':'A definir';
+ function showStep(n){state.step=n;steps.forEach((s,i)=>s.hidden=i!==n);bars.forEach((b,i)=>b.classList.toggle('active',i<=n));back.hidden=n===0;next.textContent=n===3?'Confirmar agendamento':'Continuar →';errors.forEach(e=>e.textContent='');}
+ async function loadServices(){
+  const {data,error}=await db.from('services').select('*').eq('active',true).order('sort_order').order('name');
+  if(error) throw error;
+  services=data||[];
+  const host=document.getElementById('bookingServices');host.innerHTML='';
+  if(!services.length){host.innerHTML='<p class="booking-hint">Os procedimentos estarão disponíveis para agendamento em breve. Se preferir, fale com a Duda pelo WhatsApp.</p>';return;}
+  services.forEach(s=>{const b=document.createElement('button');b.type='button';b.className='booking-option';b.innerHTML='<strong></strong><small></small>';b.querySelector('strong').textContent=s.name;b.querySelector('small').textContent=(s.duration_minutes?s.duration_minutes+' min · ':'')+money(s.price);b.addEventListener('click',()=>{state.service=s;host.querySelectorAll('.booking-option').forEach(x=>x.classList.toggle('selected',x===b));errors[0].textContent='';});host.appendChild(b);});
  }
- function showStep(n){
-  state.step=n;steps.forEach((s,i)=>s.hidden=i!==n);bars.forEach((b,i)=>b.classList.toggle('active',i<=n));
-  back.hidden=n===0;next.textContent=n===3?'Enviar solicitação ':'Continuar →';
-  error.forEach(e=>e.textContent='');
- }
- function openWizard(){
-  state.step=0;state.service='';state.date='';state.time='';state.name='';state.phone='';
-  dialog.querySelectorAll('[data-service]').forEach(b=>b.classList.remove('selected'));
+ async function openBooking(service=null){
+  state.step=0;state.service=service;state.date='';state.time='';state.name='';state.phone='';
   dateInput.value='';slots.innerHTML='';document.getElementById('bookingName').value='';document.getElementById('bookingPhone').value='';
-  showStep(0);if(!dialog.open)dialog.showModal();
+  try{await loadServices();}catch(e){document.getElementById('bookingServices').textContent='Não foi possível carregar os procedimentos. Tente novamente.';}
+  if(service){const button=[...document.querySelectorAll('#bookingServices .booking-option')].find(b=>b.querySelector('strong')?.textContent===service.name);button?.click();}
+  showStep(0);if(!booking.open)booking.showModal();
+ }
+ async function renderSlots(){
+  slots.innerHTML='';state.time='';state.date=dateInput.value;
+  if(!state.date||!state.service)return;
+  slots.innerHTML='<p class="booking-hint">Consultando horários...</p>';
+  const {data,error}=await db.rpc('get_available_slots',{p_date:state.date,p_service_id:state.service.id});
+  slots.innerHTML='';
+  if(error){document.getElementById('bookingError1').textContent='Não foi possível consultar os horários. Tente novamente.';return;}
+  if(!data?.length){slots.innerHTML='<p class="booking-hint">Não há horários disponíveis nesta data. Escolha outro dia.</p>';return;}
+  data.forEach(slot=>{const b=document.createElement('button');b.type='button';b.className='booking-slot';b.textContent=String(slot.starts_at).slice(0,5);b.addEventListener('click',()=>{state.time=String(slot.starts_at).slice(0,5);slots.querySelectorAll('.booking-slot').forEach(x=>x.classList.toggle('selected',x===b));errors[1].textContent='';});slots.appendChild(b);});
  }
  document.addEventListener('click',e=>{
-  const a=e.target.closest('a[href*="wa.me/5562994610050"]');
-  if(a){e.preventDefault();openWizard()}
+  const serviceCard=e.target.closest('.service-card');
+  if(serviceCard){const title=serviceCard.querySelector('h3')?.textContent?.trim();const s=services.find(x=>x.name.toLowerCase()===title?.toLowerCase());if(s){e.preventDefault();openService(s);}else{e.preventDefault();document.getElementById('serviceModalTitle').textContent=title||'Procedimento';document.getElementById('serviceModalDescription').textContent='As informações completas deste procedimento serão adicionadas em breve. Se desejar, fale diretamente com a Duda.';document.getElementById('serviceModalHow').textContent='Consulte a profissional';document.getElementById('serviceModalDuration').textContent='A definir';document.getElementById('serviceModalDurability').textContent='A definir';document.getElementById('serviceModalPrice').textContent='Consulte';serviceDialog.dataset.service='';if(!serviceDialog.open)serviceDialog.showModal();}}
+  const openLink=e.target.closest('a[href="#agendar"], .nav .btn, .booking-copy .btn');
+  if(openLink){e.preventDefault();openBooking();}
  });
- document.getElementById('bookingClose').addEventListener('click',()=>dialog.close());
- dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
- dialog.querySelectorAll('[data-service]').forEach(b=>b.addEventListener('click',()=>{
-  state.service=b.dataset.service;dialog.querySelectorAll('[data-service]').forEach(x=>x.classList.toggle('selected',x===b));error[0].textContent='';
- }));
- const today=new Date();const minDate=localDate(today);dateInput.min=minDate;
- const max=new Date(today);max.setDate(max.getDate()+30);dateInput.max=localDate(max);
- dateInput.addEventListener('change',()=>{state.date=dateInput.value;renderSlots();error[1].textContent=''});
- document.getElementById('bookingName').addEventListener('input',e=>{state.name=e.target.value.trim();error[2].textContent=''});
- document.getElementById('bookingPhone').addEventListener('input',e=>{state.phone=e.target.value.trim();error[2].textContent=''});
+ function openService(s){
+  serviceDialog.dataset.service=s.id;
+  document.getElementById('serviceModalTitle').textContent=s.name;
+  document.getElementById('serviceModalDescription').textContent=s.description||s.short_description||'Conheça este procedimento e tire suas dúvidas com a Duda.';
+  document.getElementById('serviceModalHow').textContent=s.procedure_details||'Consulte a profissional';
+  document.getElementById('serviceModalDuration').textContent=durationLabel(s.duration_minutes);
+  document.getElementById('serviceModalDurability').textContent=s.durability||'A definir';
+  document.getElementById('serviceModalPrice').textContent=money(s.price);
+  const img=document.getElementById('serviceModalImage');img.src=s.image_url||'';img.style.display=s.image_url?'block':'none';
+  if(!serviceDialog.open)serviceDialog.showModal();
+ }
+ document.getElementById('serviceModalClose').addEventListener('click',()=>serviceDialog.close());
+ document.getElementById('serviceWhatsApp').addEventListener('click',()=>{const s=services.find(x=>x.id===serviceDialog.dataset.service);const name=s?.name||document.getElementById('serviceModalTitle').textContent;const msg='Olá, Duda! Gostaria de saber mais e agendar '+name+'.';window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(msg),'_blank','noopener');});
+ document.getElementById('serviceBook').addEventListener('click',()=>{const s=services.find(x=>x.id===serviceDialog.dataset.service)||null;serviceDialog.close();openBooking(s);});
+ document.getElementById('bookingClose').addEventListener('click',()=>booking.close());
+ booking.addEventListener('click',e=>{if(e.target===booking)booking.close();});
+ serviceDialog.addEventListener('click',e=>{if(e.target===serviceDialog)serviceDialog.close();});
+ const today=new Date();dateInput.min=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+ const max=new Date(today);max.setDate(max.getDate()+90);dateInput.max=max.getFullYear()+'-'+String(max.getMonth()+1).padStart(2,'0')+'-'+String(max.getDate()).padStart(2,'0');
+ dateInput.addEventListener('change',renderSlots);
+ document.getElementById('bookingName').addEventListener('input',e=>state.name=e.target.value.trim());
+ document.getElementById('bookingPhone').addEventListener('input',e=>state.phone=e.target.value.trim());
  back.addEventListener('click',()=>showStep(Math.max(0,state.step-1)));
- next.addEventListener('click',()=>{
-  if(state.step===0){if(!state.service){error[0].textContent='Escolha um procedimento para continuar.';return}showStep(1);return}
-  if(state.step===1){if(!state.date||!state.time){error[1].textContent='Escolha uma data e um horário.';return}showStep(2);return}
+ next.addEventListener('click',async()=>{
+  if(state.step===0){if(!state.service){errors[0].textContent='Escolha um procedimento para continuar.';return;}showStep(1);return;}
+  if(state.step===1){if(!state.date||!state.time){errors[1].textContent='Escolha uma data e um horário disponível.';return;}showStep(2);return;}
   if(state.step===2){
    state.name=document.getElementById('bookingName').value.trim();state.phone=document.getElementById('bookingPhone').value.trim();
-   if(state.name.length<2){error[2].textContent='Informe seu nome.';return}
-   if(state.phone.replace(/\D/g,'').length<10){error[2].textContent='Informe um WhatsApp válido com DDD.';return}
-   document.getElementById('summaryService').textContent=state.service;
-   document.getElementById('summaryDate').textContent=formatDate(state.date);
+   if(state.name.length<2){errors[2].textContent='Informe seu nome.';return;}
+   if(state.phone.replace(/\D/g,'').length<10){errors[2].textContent='Informe um WhatsApp válido com DDD.';return;}
+   document.getElementById('summaryService').textContent=state.service.name;
+   document.getElementById('summaryDate').textContent=dateLabel(state.date);
    document.getElementById('summaryTime').textContent=state.time;
+   document.getElementById('summaryDuration').textContent=durationLabel(state.service.duration_minutes);
+   document.getElementById('summaryPrice').textContent=money(state.service.price);
    document.getElementById('summaryName').textContent=state.name;
-   document.getElementById('summaryPhone').textContent=state.phone;
    showStep(3);return;
   }
-  const message='Olá, Duda! Gostaria de consultar um horário pelo site Duda Cruz Beauty. Procedimento: '+state.service+'. Data desejada: '+formatDate(state.date)+'. Horário desejado: '+state.time+'. Nome: '+state.name+'. WhatsApp: '+state.phone+'.';
-  window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(message),'_blank','noopener');
-  dialog.close();
+  next.disabled=true;next.textContent='Salvando...';
+  const {data,error}=await db.rpc('create_public_appointment',{p_service_id:state.service.id,p_date:state.date,p_start:state.time,p_customer_name:state.name,p_customer_phone:state.phone});
+  next.disabled=false;next.textContent='Confirmar agendamento';
+  if(error){errors[2].textContent=error.message?.includes('não está disponível')||error.message?.includes('reservado')?'Esse horário não está mais disponível. Volte e escolha outro.':'Não foi possível concluir. Confira os dados e tente novamente.';return;}
+  booking.close();
+  alert('Solicitação registrada! A Duda poderá acompanhar seu agendamento.');
  });
+ loadServices().catch(()=>{});
 })();
 </script>
 <script>const menu=document.getElementById('menu'),links=document.getElementById('links');menu.addEventListener('click',()=>links.classList.toggle('open'));links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>links.classList.remove('open')));document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.gallery-item').forEach(i=>i.classList.toggle('hide',b.dataset.filter!=='all'&&i.dataset.kind!==b.dataset.filter))}));</script></body></html>
