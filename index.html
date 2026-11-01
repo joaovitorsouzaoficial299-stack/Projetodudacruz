@@ -130,6 +130,7 @@
  const SUPABASE_KEY='sb_publishable_GbMEDrsO9ZniFqARV4IOoA_WEzhYqGj';
  const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const whatsapp='5562994610050';
+ const freshImageUrl=url=>{if(!url)return url;const separator=url.includes('?')?'&':'?';return url+separator+'refresh='+Date.now()};
  const booking=document.getElementById('bookingModal');
  const serviceDialog=document.getElementById('serviceModal');
  const state={step:0,service:null,date:'',time:'',name:'',phone:''};
@@ -156,7 +157,7 @@
    services.forEach(s=>{
     const card=document.createElement('article');card.className='service-card';card.dataset.serviceId=s.id;
     const media=document.createElement('div');media.className='service-card-media'+(s.images.length?'':' no-images');
-    if(s.images.length){media.style.setProperty('--service-bg',`url("${s.images[0]}")`);const img=document.createElement('img');img.src=s.images[0];img.alt=s.name;media.appendChild(img);if(s.images.length>1){let index=0;setInterval(()=>{index=(index+1)%s.images.length;img.style.opacity='0';setTimeout(()=>{img.src=s.images[index];img.style.opacity='1';},180);},3200);}}
+    if(s.images.length){media.style.setProperty('--service-bg',`url("${freshImageUrl(s.images[0])}")`);const img=document.createElement('img');img.src=freshImageUrl(s.images[0]);img.alt=s.name;media.appendChild(img);if(s.images.length>1){let index=0;setInterval(()=>{index=(index+1)%s.images.length;img.style.opacity='0';setTimeout(()=>{img.src=s.images[index];img.style.opacity='1';},180);},3200);}}
     const info=document.createElement('div');info.className='service-info';
     const title=document.createElement('h3');title.textContent=s.name;
     const desc=document.createElement('p');desc.textContent=s.description||'Conheça este procedimento.';
@@ -188,7 +189,7 @@
  document.addEventListener('click',e=>{
   const serviceCard=e.target.closest('.service-card');
   if(serviceCard){const title=serviceCard.querySelector('h3')?.textContent?.trim();const s=services.find(x=>x.name.toLowerCase()===title?.toLowerCase());if(s){e.preventDefault();openService(s);}else{e.preventDefault();document.getElementById('serviceModalTitle').textContent=title||'Procedimento';document.getElementById('serviceModalDescription').textContent='As informações completas deste procedimento serão adicionadas em breve. Se desejar, fale diretamente com a Duda.';document.getElementById('serviceModalDuration').textContent='A definir';document.getElementById('serviceModalDurability').textContent='A definir';document.getElementById('serviceModalHowRow').hidden=true;document.getElementById('serviceModalPrice').textContent='Consulte';serviceDialog.dataset.service='';if(!serviceDialog.open)serviceDialog.showModal();}}
-  const openLink=e.target.closest('a[href="#agendar"], .nav .btn, .booking-copy .btn');
+  const openLink=e.target.closest('a[href="#agendar"], .nav .btn');
   if(openLink){e.preventDefault();openBooking();}
  });
  let modalImages=[],modalImageIndex=0,modalImageTimer=null;
@@ -196,7 +197,7 @@
   const img=document.getElementById('serviceModalImage'),dots=document.getElementById('serviceImageDots');
   if(!modalImages.length){document.getElementById('serviceModalCarousel').hidden=true;return;}
   document.getElementById('serviceModalCarousel').hidden=false;
-  img.src=modalImages[modalImageIndex];img.alt='Foto do procedimento '+document.getElementById('serviceModalTitle').textContent;
+  img.src=freshImageUrl(modalImages[modalImageIndex]);img.alt='Foto do procedimento '+document.getElementById('serviceModalTitle').textContent;
   dots.innerHTML='';modalImages.forEach((_,i)=>{const dot=document.createElement('span');if(i===modalImageIndex)dot.className='active';dots.appendChild(dot);});
  }
  function moveModalImage(step){if(!modalImages.length)return;modalImageIndex=(modalImageIndex+step+modalImages.length)%modalImages.length;renderModalImage();}
@@ -256,7 +257,7 @@
   const {data,error}=await db.from('gallery_items').select('*').eq('active',true).order('sort_order').order('created_at',{ascending:false});
   if(error||!data?.length)return;
   const grid=document.querySelector('.gallery-grid');if(!grid)return;grid.innerHTML='';
-  data.forEach(g=>{const item=document.createElement('div');item.className='gallery-item';item.dataset.kind=g.category;item.style.setProperty('--gallery-bg',`url(${JSON.stringify(g.image_url)})`);const img=document.createElement('img');img.src=g.image_url;img.alt=g.title||'Resultado Duda Cruz Beauty';item.appendChild(img);grid.appendChild(item);});
+  data.forEach(g=>{const item=document.createElement('div');item.className='gallery-item';item.dataset.kind=g.category;const imageUrl=freshImageUrl(g.image_url);item.style.setProperty('--gallery-bg',`url(${JSON.stringify(imageUrl)})`);const img=document.createElement('img');img.src=imageUrl;img.alt=g.title||'Resultado Duda Cruz Beauty';item.appendChild(img);grid.appendChild(item);});
  }
  loadServices().catch(()=>{});
  loadPublicGallery().catch(()=>{});
