@@ -109,7 +109,7 @@
    if(password.length<10)throw new Error('A senha precisa ter pelo menos 10 caracteres.');
    if(setupMode){
     const email=$('adminEmail').value.trim().toLowerCase();
-    if(!/^[^\\s@]+@gmail\\.com$/.test(email))throw new Error('Informe um endereço Gmail válido.');
+    if(!/^[^\s@]+@gmail\.com$/.test(email))throw new Error('Informe um endereço Gmail válido.');
     const response=await fetch(edgeUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'setup',email,username,password})});
     const result=await response.json().catch(()=>({}));
     if(!response.ok||!result.success)throw new Error(result.error||'Não foi possível iniciar o cadastro.');
