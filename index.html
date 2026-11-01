@@ -125,7 +125,7 @@
   </section>
   <section class="booking-step" data-step="1" hidden>
    <h3>Escolha a data e o horário</h3>
-   <p class="booking-hint">Selecione um dia e um dos horários de exemplo.</p>
+   <p class="booking-hint">Indique sua preferência; a disponibilidade será confirmada pela Duda.</p>
    <label class="booking-field"><span>Data desejada</span><input id="bookingDate" type="date"></label>
    <div class="booking-slots" id="bookingSlots"></div>
    <p class="booking-error" id="bookingError1"></p>
@@ -221,8 +221,8 @@
    document.getElementById('summaryPhone').textContent=state.phone;
    showStep(3);return;
   }
-  const message='Olá! Gostaria de solicitar um agendamento pelo site.\\n\\nProcedimento: '+state.service+'\\nData desejada: '+formatDate(state.date)+'\\nHorário desejado: '+state.time+'\\nNome: '+state.name+'\\nMeu WhatsApp: '+state.phone+'\\n\\nSe possível, confirme a disponibilidade. Sei que o horário depende de confirmação.';
-  window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(message),'_blank','noopener');
+  const message='Olá, Duda! Gostaria de consultar um horário pelo site Duda Cruz Beauty. Procedimento: '+state.service+'. Data desejada: '+formatDate(state.date)+'. Horário desejado: '+state.time+'. Nome: '+state.name+'. WhatsApp: '+state.phone+'.';
+  window.open(instagram,'_blank','noopener');
   dialog.close();
  });
 })();
