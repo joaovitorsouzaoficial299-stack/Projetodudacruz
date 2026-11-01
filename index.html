@@ -148,7 +148,7 @@
     <div><span>Nome</span><strong id="summaryName">—</strong></div>
     <div><span>WhatsApp</span><strong id="summaryPhone">—</strong></div>
    </div>
-   <div class="booking-notice">Ao tocar em “Enviar pedido”, o WhatsApp será aberto com os dados preenchidos. O horário só fica confirmado depois do retorno do Studio.</div>
+   <div class="booking-notice">Ao tocar em “Enviar solicitação”, o WhatsApp será aberto com os dados preenchidos. O horário só fica confirmado depois do retorno do Studio.</div>
   </section>
   <div class="booking-actions">
    <button class="booking-back" type="button" id="bookingBack" hidden>← Voltar</button>
@@ -174,7 +174,7 @@
   slots.innerHTML='';state.time='';
   if(!dateInput.value)return;
   const day=new Date(dateInput.value+'T12:00:00').getDay();
-  if(day===0){slots.innerHTML='<p class="booking-hint">O Studio atende de segunda a sábado. Escolha outro dia.</p>';return}
+  /* A disponibilidade será confirmada diretamente com a profissional. */
   ['09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'].forEach(t=>{
    const b=document.createElement('button');b.type='button';b.className='booking-slot';b.textContent=t;
    b.addEventListener('click',()=>{state.time=t;slots.querySelectorAll('.booking-slot').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');error[1].textContent=''});
@@ -183,7 +183,7 @@
  }
  function showStep(n){
   state.step=n;steps.forEach((s,i)=>s.hidden=i!==n);bars.forEach((b,i)=>b.classList.toggle('active',i<=n));
-  back.hidden=n===0;next.textContent=n===3?'Enviar pedido pelo WhatsApp ':'Continuar →';
+  back.hidden=n===0;next.textContent=n===3?'Enviar solicitação ':'Continuar →';
   error.forEach(e=>e.textContent='');
  }
  function openWizard(){
