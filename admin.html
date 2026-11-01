@@ -10,19 +10,8 @@
 </style>
 </head>
 <body>
-<div id="loginView" class="shell login">
- <div class="panel">
-  <div class="brand">Duda Cruz Beauty</div><p class="sub">Área administrativa</p>
-  <h1>Entrar no painel</h1><p class="muted">Acesso exclusivo da profissional.</p>
-  <form id="loginForm">
-   <div class="field"><label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required></div>
-   <div class="field"><label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" required></div>
-   <button class="btn" id="loginButton" type="submit">Entrar</button>
-  </form><p id="loginMessage" class="notice hidden"></p>
- </div>
-</div>
-<div id="appView" class="shell hidden">
- <div class="topline"><div><div class="brand">Duda Cruz Beauty</div><div class="sub">Painel de gerenciamento</div></div><button class="btn secondary" id="logoutButton">Sair</button></div>
+<div id="appView" class="shell">
+ <div class="topline"><div><div class="brand">Duda Cruz Beauty</div><div class="sub">Painel de gerenciamento</div></div></div>
  <div class="notice">As alterações salvas aqui aparecem no site. Fotos enviadas ficam armazenadas no espaço privado de mídia do projeto e são exibidas publicamente no site.</div>
  <nav class="tabs" aria-label="Gerenciamento">
   <button class="tab active" data-tab="services">Serviços</button><button class="tab" data-tab="hours">Horários</button><button class="tab" data-tab="blocks">Bloqueios</button><button class="tab" data-tab="appointments">Agendamentos</button><button class="tab" data-tab="gallery">Resultados</button>
@@ -85,21 +74,8 @@
  function message(el,text,isError=false){el.textContent=text;el.classList.remove('hidden');el.style.background=isError?'#f8e5e8':'#f7eeee';}
  function clearMessage(el){el.classList.add('hidden');}
  function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
- async function ensureAdmin(){
-  const user=db.auth.getUser?await db.auth.getUser():{data:{user:null}};
-  if(!user.data.user)return false;
-  const {data,error}=await db.rpc('is_current_user_admin');
-  if(error||data!==true){await db.auth.signOut();message(loginMessage,'Este usuário não tem permissão de administrador.',true);return false;}
-  loginView.classList.add('hidden');appView.classList.remove('hidden');await refreshAll();return true;
- }
- $('loginForm').addEventListener('submit',async e=>{
-  e.preventDefault();clearMessage(loginMessage);$('loginButton').disabled=true;$('loginButton').textContent='Entrando...';
-  const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
-  $('loginButton').disabled=false;$('loginButton').textContent='Entrar';
-  if(error){message(loginMessage,'Não foi possível entrar. Confira e-mail e senha.',true);return;}
-  await ensureAdmin();
- });
- $('logoutButton').addEventListener('click',async()=>{await db.auth.signOut();appView.classList.add('hidden');loginView.classList.remove('hidden');});
+ async function startPanel(){await refreshAll();}
+ startPanel().catch(err=>message(appMessage,'Erro ao carregar painel: '+err.message,true));
  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tab-panel').forEach(x=>x.classList.toggle('hidden',x.id!=='tab-'+b.dataset.tab));}));
  async function refreshAll(){await Promise.all([loadServices(),loadHours(),loadBlocks(),loadAppointments(),loadGallery()]);}
  async function upload(file,folder){const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=folder+'/'+crypto.randomUUID()+'.'+ext;const {error}=await db.storage.from('duda-beauty').upload(path,file,{upsert:false,contentType:file.type});if(error)throw error;return db.storage.from('duda-beauty').getPublicUrl(path).data.publicUrl;}
@@ -125,7 +101,6 @@
  async function loadAppointments(){const {data,error}=await db.from('appointments').select('*').order('appointment_date').order('starts_at');if(error)throw error;const body=$('appointmentRows');body.innerHTML='';if(!data?.length){body.innerHTML='<tr><td colspan="7">Nenhum agendamento recebido ainda.</td></tr>';return;}data.forEach(a=>{const tr=document.createElement('tr');const date=new Date(a.appointment_date+'T12:00:00').toLocaleDateString('pt-BR');tr.innerHTML='<td>'+date+'</td><td>'+a.starts_at.slice(0,5)+'</td><td>'+escapeHtml(a.customer_name)+'</td><td>'+escapeHtml(a.customer_phone)+'</td><td>'+escapeHtml(a.service_name)+'</td><td></td><td></td>';const select=document.createElement('select');['pending','confirmed','cancelled'].forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent={pending:'Pendente',confirmed:'Confirmado',cancelled:'Cancelado'}[v];o.selected=a.status===v;select.appendChild(o);});tr.children[5].appendChild(select);tr.children[6].appendChild(action('Salvar',async()=>{const {error}=await db.from('appointments').update({status:select.value}).eq('id',a.id);if(error)message(appMessage,error.message,true);else{message(appMessage,'Agendamento atualizado.');loadAppointments();}}));body.appendChild(tr);});}
  $('galleryForm').addEventListener('submit',async e=>{e.preventDefault();const file=$('galleryImage').files[0];if(!file)return;try{const image_url=await upload(file,'gallery');const {error}=await db.from('gallery_items').insert({title:$('galleryTitle').value.trim(),category:$('galleryCategory').value,image_url,active:true});if(error)throw error;$('galleryForm').reset();await loadGallery();message(appMessage,'Foto adicionada à galeria.');}catch(err){message(appMessage,'Erro ao enviar foto: '+err.message,true);}});
  async function loadGallery(){const {data,error}=await db.from('gallery_items').select('*').order('sort_order').order('created_at',{ascending:false});if(error)throw error;$('galleryList').innerHTML='';(data||[]).forEach(g=>{const img=document.createElement('img');img.className='preview';img.src=g.image_url;const label=document.createElement('div');label.innerHTML='<strong>'+escapeHtml(g.title||'Resultado')+'</strong><p>'+({brows:'Sobrancelhas',lashes:'Cílios',beauty:'Beleza'}[g.category])+'</p>';const wrap=document.createElement('div');wrap.className='item';wrap.append(img,label,action('Remover',async()=>{if(!confirm('Remover esta foto da galeria?'))return;const {error}=await db.from('gallery_items').delete().eq('id',g.id);if(error)message(appMessage,error.message,true);else loadGallery();},'danger'));$('galleryList').appendChild(wrap);});}
- db.auth.getSession().then(({data})=>{if(data.session)ensureAdmin();});
 })();
 </script>
 </body></html>
