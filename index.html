@@ -222,7 +222,7 @@
    showStep(3);return;
   }
   const message='Olá, Duda! Gostaria de consultar um horário pelo site Duda Cruz Beauty. Procedimento: '+state.service+'. Data desejada: '+formatDate(state.date)+'. Horário desejado: '+state.time+'. Nome: '+state.name+'. WhatsApp: '+state.phone+'.';
-  const message='Olá, Duda! Gostaria de consultar um horário pelo site Duda Cruz Beauty. Procedimento: '+state.service+'. Data desejada: '+formatDate(state.date)+'. Horário desejado: '+state.time+'. Nome: '+state.name+'. Meu WhatsApp: '+state.phone+'.';\n  window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(message),'_blank','noopener');
+  window.open('https://wa.me/'+whatsapp+'?text='+encodeURIComponent(message),'_blank','noopener');
   dialog.close();
  });
 })();
