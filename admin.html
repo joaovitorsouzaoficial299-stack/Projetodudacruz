@@ -10,8 +10,9 @@
 .day-switch{display:inline-flex;align-items:center;gap:9px;cursor:pointer;font-size:12px;color:var(--muted);user-select:none}.day-switch input{position:absolute;opacity:0;width:1px;height:1px}.day-switch .switch-track{position:relative;width:44px;height:24px;border-radius:20px;background:#d8c9c8;transition:background .2s;flex:none}.day-switch .switch-track:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0002;transition:transform .2s}.day-switch input:checked+.switch-track{background:var(--wine)}.day-switch input:checked+.switch-track:after{transform:translateX(20px)}.day-switch input:focus-visible+.switch-track{outline:2px solid var(--wine);outline-offset:3px}.day-switch .switch-state{min-width:58px}.modal-backdrop{position:fixed;inset:0;background:#24161999;display:none;align-items:center;justify-content:center;padding:18px;z-index:1000}.modal-backdrop.open{display:flex}.edit-modal{background:#fff;width:min(760px,100%);max-height:92vh;overflow:auto;border-radius:10px;padding:24px;box-shadow:0 20px 70px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.modal-head h2{font:25px "Playfair Display",serif;margin:0}.modal-close{border:0;background:#f3e4e5;color:var(--wine);width:36px;height:36px;border-radius:50%;font-size:22px}.edit-modal .field{margin:12px 0}@media(max-width:600px){.edit-modal{padding:17px;max-height:95vh}.modal-head h2{font-size:22px}}</style>
 </head>
 <body>
-<div id="appView" class="shell">
- <div class="topline"><div><div class="brand">Duda Cruz Beauty</div><div class="sub">Painel de gerenciamento</div></div></div>
+<div id="loginView" class="shell login"><div class="panel"><div class="brand">Duda Cruz Beauty</div><div class="sub">Acesso restrito ao gerenciamento</div><h1 id="loginTitle">Entrar no painel</h1><p id="loginDescription" class="muted">Use seu usuário e senha de administrador.</p><form id="loginForm"><div class="field"><label for="adminUsername">Usuário</label><input id="adminUsername" autocomplete="username" required minlength="3" maxlength="30" placeholder="Seu usuário"></div><div class="field"><label for="adminPassword">Senha</label><input id="adminPassword" type="password" autocomplete="current-password" required minlength="10" placeholder="Sua senha"></div><button class="btn" id="loginButton" type="submit" style="width:100%">Entrar</button></form><p id="loginMessage" class="notice hidden" role="status"></p><button class="btn secondary" id="setupModeButton" type="button" style="width:100%;margin-top:8px">Primeiro acesso? Criar administrador</button></div></div>
+<div id="appView" class="shell hidden">
+ <div class="topline"><div><div class="brand">Duda Cruz Beauty</div><div class="sub">Painel de gerenciamento</div></div><button class="btn secondary" id="logoutButton" type="button">Sair</button></div>
  <div class="notice">As alterações salvas aqui aparecem no site. Fotos enviadas ficam armazenadas no espaço privado de mídia do projeto e são exibidas publicamente no site.</div>
  <nav class="tabs" aria-label="Gerenciamento">
   <button class="tab active" data-tab="services">Serviços</button><button class="tab" data-tab="hours">Horários</button><button class="tab" data-tab="gallery">Resultados</button>
@@ -72,12 +73,52 @@
  const db=window.supabase.createClient('https://haytimlsdmjzjxvtlagn.supabase.co','sb_publishable_GbMEDrsO9ZniFqARV4IOoA_WEzhYqGj');
  const $=id=>document.getElementById(id);
  const loginView=$('loginView'),appView=$('appView'),loginMessage=$('loginMessage'),appMessage=$('appMessage');
+ const edgeUrl='https://haytimlsdmjzjxvtlagn.supabase.co/functions/v1/duda-admin-access';
+ let setupMode=false;
  const days=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
  function message(el,text,isError=false){el.textContent=text;el.classList.remove('hidden');el.style.background=isError?'#f8e5e8':'#f7eeee';}
  function clearMessage(el){el.classList.add('hidden');}
  function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
  async function startPanel(){await refreshAll();}
- startPanel().catch(err=>message(appMessage,'Erro ao carregar painel: '+err.message,true));
+ function showLogin(){appView.classList.add('hidden');loginView.classList.remove('hidden');}
+ async function enterPanel(){
+  const {data:{session}}=await db.auth.getSession();
+  if(!session){showLogin();return;}
+  const response=await fetch(edgeUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({action:'verify'})});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.authorized){await db.auth.signOut();showLogin();message(loginMessage,result.error||'Acesso não autorizado.',true);return;}
+  loginView.classList.add('hidden');appView.classList.remove('hidden');
+  try{await startPanel();}catch(err){message(appMessage,'Erro ao carregar painel: '+err.message,true);}
+ }
+ $('setupModeButton').addEventListener('click',()=>{
+  setupMode=!setupMode;
+  $('loginTitle').textContent=setupMode?'Criar primeiro administrador':'Entrar no painel';
+  $('loginDescription').textContent=setupMode?'Cadastre o usuário e uma senha com pelo menos 10 caracteres. Essa opção só funciona se ainda não existir administrador.':'Use seu usuário e senha de administrador.';
+  $('loginButton').textContent=setupMode?'Criar administrador':'Entrar';
+  $('adminPassword').autocomplete=setupMode?'new-password':'current-password';
+  $('setupModeButton').textContent=setupMode?'Voltar para entrar':'Primeiro acesso? Criar administrador';
+  clearMessage(loginMessage);
+ });
+ $('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();const button=$('loginButton');button.disabled=true;clearMessage(loginMessage);
+  const username=$('adminUsername').value.trim().toLowerCase(),password=$('adminPassword').value;
+  try{
+   if(!/^[a-z0-9._-]{3,30}$/.test(username))throw new Error('Use de 3 a 30 caracteres: letras, números, ponto, hífen ou underline.');
+   if(password.length<10)throw new Error('A senha precisa ter pelo menos 10 caracteres.');
+   if(setupMode){
+    const response=await fetch(edgeUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'setup',username,password})});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||!result.success)throw new Error(result.error||'Não foi possível criar o administrador.');
+    setupMode=false;$('loginTitle').textContent='Entrar no painel';$('loginDescription').textContent='Administrador criado. Entre com seus dados.';$('loginButton').textContent='Entrar';$('setupModeButton').textContent='Primeiro acesso? Criar administrador';
+   }
+   const {error}=await db.auth.signInWithPassword({email:username+'@login.dudacruzbeauty.com',password});if(error)throw error;
+   await enterPanel();
+  }catch(err){message(loginMessage,err.message||'Não foi possível entrar.',true);}
+  finally{button.disabled=false;}
+ });
+ $('logoutButton').addEventListener('click',async()=>{await db.auth.signOut();showLogin();$('adminPassword').value='';clearMessage(loginMessage);});
+ db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT')showLogin();});
+ enterPanel().catch(err=>{showLogin();message(loginMessage,'Erro ao verificar acesso: '+err.message,true);});
  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tab-panel').forEach(x=>x.classList.toggle('hidden',x.id!=='tab-'+b.dataset.tab));}));
  async function refreshAll(){await Promise.all([loadServices(),loadHours(),loadGallery()]);}
  async function upload(file,folder){const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=folder+'/'+crypto.randomUUID()+'.'+ext;const {error}=await db.storage.from('duda-beauty').upload(path,file,{upsert:false,contentType:file.type});if(error)throw error;return db.storage.from('duda-beauty').getPublicUrl(path).data.publicUrl;}
