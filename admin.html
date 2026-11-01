@@ -14,7 +14,7 @@
  <div class="topline"><div><div class="brand">Duda Cruz Beauty</div><div class="sub">Painel de gerenciamento</div></div></div>
  <div class="notice">As alterações salvas aqui aparecem no site. Fotos enviadas ficam armazenadas no espaço privado de mídia do projeto e são exibidas publicamente no site.</div>
  <nav class="tabs" aria-label="Gerenciamento">
-  <button class="tab active" data-tab="services">Serviços</button><button class="tab" data-tab="hours">Horários</button><button class="tab" data-tab="blocks">Bloqueios</button><button class="tab" data-tab="appointments">Agendamentos</button><button class="tab" data-tab="gallery">Resultados</button>
+  <button class="tab active" data-tab="services">Serviços</button><button class="tab" data-tab="hours">Horários</button><button class="tab" data-tab="gallery">Resultados</button>
  </nav>
  <section id="tab-services" class="panel tab-panel">
   <h2 class="section-title">Serviços e procedimentos</h2><p class="muted">Cadastre valores, explicações, duração e durabilidade para aparecerem na janela de cada procedimento.</p>
@@ -34,26 +34,11 @@
   </form><div id="serviceList" class="list"></div>
  </section>
  <section id="tab-hours" class="panel tab-panel hidden">
-  <h2 class="section-title">Horários de atendimento</h2><p class="muted">Defina os períodos em que a cliente poderá escolher horários no site. Os horários são oferecidos em intervalos de 30 minutos.</p>
-  <form id="hoursForm"><div class="row">
-   <div class="field"><label for="weekday">Dia da semana</label><select id="weekday"><option value="1">Segunda-feira</option><option value="2">Terça-feira</option><option value="3">Quarta-feira</option><option value="4">Quinta-feira</option><option value="5">Sexta-feira</option><option value="6">Sábado</option><option value="0">Domingo</option></select></div>
-   <div class="field"><label for="opensAt">Início</label><input id="opensAt" type="time" required value="09:00"></div>
-   <div class="field"><label for="closesAt">Fim</label><input id="closesAt" type="time" required value="18:00"></div>
-  </div><button class="btn" type="submit">Adicionar horário</button></form><div id="hoursList" class="list"></div>
+  <h2 class="section-title">Horários de atendimento</h2><p class="muted">Ative os dias em que atende e ajuste os horários manualmente. Dias desativados não aparecem para agendamento.</p>
+  <div id="weeklyHours" class="list"></div>
  </section>
- <section id="tab-blocks" class="panel tab-panel hidden">
-  <h2 class="section-title">Bloquear horários e datas</h2><p class="muted">Use para folgas, compromissos ou pausas. O período bloqueado deixa de aparecer para as clientes.</p>
-  <form id="blockForm"><div class="grid">
-   <div class="field"><label for="blockDate">Data</label><input id="blockDate" type="date" required></div>
-   <div class="field"><label for="blockReason">Motivo (opcional)</label><input id="blockReason" placeholder="Ex.: compromisso"></div>
-   <div class="field"><label for="blockStart">Início</label><input id="blockStart" type="time" required value="09:00"></div>
-   <div class="field"><label for="blockEnd">Fim</label><input id="blockEnd" type="time" required value="18:00"></div>
-  </div><button class="btn" type="submit">Bloquear período</button></form><div id="blockList" class="list"></div>
- </section>
- <section id="tab-appointments" class="panel tab-panel hidden">
-  <h2 class="section-title">Agendamentos recebidos</h2><p class="muted">Acompanhe solicitações, confirme ou cancele horários.</p>
-  <div class="table-wrap"><table><thead><tr><th>Data</th><th>Horário</th><th>Cliente</th><th>WhatsApp</th><th>Procedimento</th><th>Status</th><th>Ação</th></tr></thead><tbody id="appointmentRows"><tr><td colspan="7">Carregando...</td></tr></tbody></table></div>
- </section>
+ 
+ 
  <section id="tab-gallery" class="panel tab-panel hidden">
   <h2 class="section-title">Resultados e fotos</h2><p class="muted">Adicione fotos reais dos trabalhos para a galeria do site. Você poderá remover quando quiser.</p>
   <form id="galleryForm"><div class="grid">
@@ -77,7 +62,7 @@
  async function startPanel(){await refreshAll();}
  startPanel().catch(err=>message(appMessage,'Erro ao carregar painel: '+err.message,true));
  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tab-panel').forEach(x=>x.classList.toggle('hidden',x.id!=='tab-'+b.dataset.tab));}));
- async function refreshAll(){await Promise.all([loadServices(),loadHours(),loadBlocks(),loadAppointments(),loadGallery()]);}
+ async function refreshAll(){await Promise.all([loadServices(),loadHours(),loadGallery()]);}
  async function upload(file,folder){const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=folder+'/'+crypto.randomUUID()+'.'+ext;const {error}=await db.storage.from('duda-beauty').upload(path,file,{upsert:false,contentType:file.type});if(error)throw error;return db.storage.from('duda-beauty').getPublicUrl(path).data.publicUrl;}
  function item(title,detail,buttons){const el=document.createElement('div');el.className='item';const left=document.createElement('div');left.innerHTML='<strong>'+escapeHtml(title)+'</strong><p>'+escapeHtml(detail)+'</p>';const right=document.createElement('div');right.className='actions';buttons.forEach(b=>right.appendChild(b));el.append(left,right);return el;}
  function action(label,handler,kind='secondary'){const b=document.createElement('button');b.type='button';b.className='btn '+kind;b.textContent=label;b.addEventListener('click',handler);return b;}
@@ -89,16 +74,52 @@
    const q=id?db.from('services').update(row).eq('id',id):db.from('services').insert(row);const {error}=await q;if(error)throw error;resetService();await loadServices();message(appMessage,'Procedimento salvo com sucesso.');
   }catch(err){message(appMessage,'Erro ao salvar procedimento: '+err.message,true);}
  });
- async function loadServices(){const {data,error}=await db.from('services').select('*').order('sort_order').order('name');if(error)throw error;$('serviceList').innerHTML='';(data||[]).forEach(s=>$('serviceList').appendChild(item(s.name,(s.price===null?'Valor a definir':Number(s.price).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}))+' · '+s.duration_minutes+' min · '+(s.active?'Publicado':'Oculto'),[
-  action('Editar',()=>{$('serviceId').value=s.id;$('serviceName').value=s.name;$('servicePrice').value=s.price??'';$('serviceDuration').value=s.duration_minutes;$('serviceDurability').value=s.durability;$('serviceShort').value=s.short_description;$('serviceDescription').value=s.description;$('serviceHow').value=s.procedure_details;$('saveService').textContent='Atualizar procedimento';window.scrollTo({top:0,behavior:'smooth'});}),
-  action(s.active?'Ocultar':'Publicar',async()=>{const {error}=await db.from('services').update({active:!s.active}).eq('id',s.id);if(error)message(appMessage,error.message,true);else loadServices();}),
-  action('Excluir',async()=>{if(!confirm('Excluir este procedimento?'))return;const {error}=await db.from('services').delete().eq('id',s.id);if(error)message(appMessage,error.message,true);else loadServices();},'danger')
- ])));}
- $('hoursForm').addEventListener('submit',async e=>{e.preventDefault();const row={weekday:Number($('weekday').value),opens_at:$('opensAt').value,closes_at:$('closesAt').value,active:true};const {error}=await db.from('business_hours').insert(row);if(error)message(appMessage,'Não foi possível adicionar: '+error.message,true);else{await loadHours();message(appMessage,'Horário adicionado.');}});
- async function loadHours(){const {data,error}=await db.from('business_hours').select('*').order('weekday').order('opens_at');if(error)throw error;$('hoursList').innerHTML='';(data||[]).forEach(h=>$('hoursList').appendChild(item(days[h.weekday],h.opens_at.slice(0,5)+' às '+h.closes_at.slice(0,5),[action('Remover',async()=>{if(!confirm('Remover este horário?'))return;const {error}=await db.from('business_hours').delete().eq('id',h.id);if(error)message(appMessage,error.message,true);else loadHours();},'danger')])));}
- $('blockForm').addEventListener('submit',async e=>{e.preventDefault();const row={blocked_date:$('blockDate').value,starts_at:$('blockStart').value,ends_at:$('blockEnd').value,reason:$('blockReason').value.trim()};const {error}=await db.from('blocked_slots').insert(row);if(error)message(appMessage,'Não foi possível bloquear: '+error.message,true);else{await loadBlocks();message(appMessage,'Período bloqueado.');}});
- async function loadBlocks(){const {data,error}=await db.from('blocked_slots').select('*').order('blocked_date').order('starts_at');if(error)throw error;$('blockList').innerHTML='';(data||[]).forEach(b=>$('blockList').appendChild(item(new Date(b.blocked_date+'T12:00:00').toLocaleDateString('pt-BR'),b.starts_at.slice(0,5)+' às '+b.ends_at.slice(0,5)+' · '+(b.reason||'Bloqueio'),[action('Remover',async()=>{const {error}=await db.from('blocked_slots').delete().eq('id',b.id);if(error)message(appMessage,error.message,true);else loadBlocks();},'danger')])));}
- async function loadAppointments(){const {data,error}=await db.from('appointments').select('*').order('appointment_date').order('starts_at');if(error)throw error;const body=$('appointmentRows');body.innerHTML='';if(!data?.length){body.innerHTML='<tr><td colspan="7">Nenhum agendamento recebido ainda.</td></tr>';return;}data.forEach(a=>{const tr=document.createElement('tr');const date=new Date(a.appointment_date+'T12:00:00').toLocaleDateString('pt-BR');tr.innerHTML='<td>'+date+'</td><td>'+a.starts_at.slice(0,5)+'</td><td>'+escapeHtml(a.customer_name)+'</td><td>'+escapeHtml(a.customer_phone)+'</td><td>'+escapeHtml(a.service_name)+'</td><td></td><td></td>';const select=document.createElement('select');['pending','confirmed','cancelled'].forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent={pending:'Pendente',confirmed:'Confirmado',cancelled:'Cancelado'}[v];o.selected=a.status===v;select.appendChild(o);});tr.children[5].appendChild(select);tr.children[6].appendChild(action('Salvar',async()=>{const {error}=await db.from('appointments').update({status:select.value}).eq('id',a.id);if(error)message(appMessage,error.message,true);else{message(appMessage,'Agendamento atualizado.');loadAppointments();}}));body.appendChild(tr);});}
+ async function loadServices(){
+  const {data,error}=await db.from('services').select('*').order('sort_order').order('name');if(error)throw error;
+  const host=$('serviceList');host.innerHTML='';
+  (data||[]).forEach(s=>{
+   const wrap=document.createElement('div');wrap.className='item';
+   if(s.image_url){const img=document.createElement('img');img.className='preview';img.src=s.image_url;img.alt=s.name;wrap.appendChild(img);}
+   const info=document.createElement('div');info.style.flex='1';info.innerHTML='<strong>'+escapeHtml(s.name)+'</strong><p>'+(s.price===null?'Valor a definir':Number(s.price).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}))+' · '+s.duration_minutes+' min · '+(s.active?'Publicado':'Oculto')+'</p>';
+   const buttons=document.createElement('div');buttons.className='actions';
+   buttons.append(
+    action('Editar',()=>{$('serviceId').value=s.id;$('serviceName').value=s.name;$('servicePrice').value=s.price??'';$('serviceDuration').value=s.duration_minutes;$('serviceDurability').value=s.durability;$('serviceShort').value=s.short_description;$('serviceDescription').value=s.description;$('serviceHow').value=s.procedure_details;$('saveService').textContent='Atualizar procedimento';window.scrollTo({top:0,behavior:'smooth'});}),
+    action(s.active?'Ocultar':'Publicar',async()=>{const result=await db.from('services').update({active:!s.active}).eq('id',s.id);if(result.error)message(appMessage,result.error.message,true);else loadServices();}),
+    action('Trocar foto',()=>{$('serviceId').value=s.id;$('serviceName').value=s.name;$('servicePrice').value=s.price??'';$('serviceDuration').value=s.duration_minutes;$('serviceDurability').value=s.durability;$('serviceShort').value=s.short_description;$('serviceDescription').value=s.description;$('serviceHow').value=s.procedure_details;$('serviceImage').click();}),
+    action('Remover foto',async()=>{if(!s.image_url||!confirm('Remover a foto deste procedimento?'))return;const result=await db.from('services').update({image_url:null}).eq('id',s.id);if(result.error)message(appMessage,result.error.message,true);else loadServices();},'danger'),
+    action('Excluir',async()=>{if(!confirm('Excluir este procedimento?'))return;const result=await db.from('services').delete().eq('id',s.id);if(result.error)message(appMessage,result.error.message,true);else loadServices();},'danger')
+   );
+   wrap.append(info,buttons);host.appendChild(wrap);
+  });
+ }
+ async function loadHours(){
+  const {data,error}=await db.from('business_hours').select('*').order('weekday').order('opens_at');if(error)throw error;
+  const host=$('weeklyHours');host.innerHTML='';
+  for(let day=0;day<7;day++){
+   const rows=(data||[]).filter(r=>Number(r.weekday)===day),active=rows.some(r=>r.active);
+   const card=document.createElement('div');card.className='panel';card.style.padding='16px';card.style.boxShadow='none';
+   const head=document.createElement('div');head.className='row';head.style.justifyContent='space-between';
+   const name=document.createElement('strong');name.textContent=days[day];
+   const label=document.createElement('label');label.style.display='flex';label.style.alignItems='center';label.style.gap='8px';label.style.fontSize='12px';
+   const toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=active;label.append(toggle,document.createTextNode(active?'Ativo':'Desativado'));
+   toggle.addEventListener('change',async()=>{
+    if(toggle.checked){
+     const result=rows.length?await db.from('business_hours').update({active:true}).eq('weekday',day):await db.from('business_hours').insert({weekday:day,opens_at:'09:00',closes_at:'18:00',active:true});
+     if(result.error){message(appMessage,result.error.message,true);toggle.checked=false;return;}
+    }else{const result=await db.from('business_hours').update({active:false}).eq('weekday',day);if(result.error){message(appMessage,result.error.message,true);toggle.checked=true;return;}}
+    await loadHours();
+   });
+   head.append(name,label);card.appendChild(head);
+   if(rows.length)rows.forEach(row=>{
+    const line=document.createElement('div');line.className='row';line.style.marginTop='12px';
+    const from=document.createElement('input');from.type='time';from.value=row.opens_at.slice(0,5);from.disabled=!active;from.style.padding='9px';from.style.border='1px solid var(--line)';
+    const to=document.createElement('input');to.type='time';to.value=row.closes_at.slice(0,5);to.disabled=!active;to.style.padding='9px';to.style.border='1px solid var(--line)';
+    const save=action('Salvar horário',async()=>{if(from.value>=to.value){message(appMessage,'O horário final precisa ser depois do inicial.',true);return;}const result=await db.from('business_hours').update({opens_at:from.value,closes_at:to.value}).eq('id',row.id);if(result.error)message(appMessage,result.error.message,true);else message(appMessage,'Horário de '+days[day]+' atualizado.');});
+    line.append(from,document.createTextNode(' até '),to,save);card.appendChild(line);
+   });else{const hint=document.createElement('p');hint.className='muted';hint.textContent='Ao ativar, será criado o horário padrão das 09:00 às 18:00. Você poderá alterá-lo.';card.appendChild(hint);}
+   host.appendChild(card);
+  }
+ }
  $('galleryForm').addEventListener('submit',async e=>{e.preventDefault();const file=$('galleryImage').files[0];if(!file)return;try{const image_url=await upload(file,'gallery');const {error}=await db.from('gallery_items').insert({title:$('galleryTitle').value.trim(),category:$('galleryCategory').value,image_url,active:true});if(error)throw error;$('galleryForm').reset();await loadGallery();message(appMessage,'Foto adicionada à galeria.');}catch(err){message(appMessage,'Erro ao enviar foto: '+err.message,true);}});
  async function loadGallery(){const {data,error}=await db.from('gallery_items').select('*').order('sort_order').order('created_at',{ascending:false});if(error)throw error;$('galleryList').innerHTML='';(data||[]).forEach(g=>{const img=document.createElement('img');img.className='preview';img.src=g.image_url;const label=document.createElement('div');label.innerHTML='<strong>'+escapeHtml(g.title||'Resultado')+'</strong><p>'+({brows:'Sobrancelhas',lashes:'Cílios',beauty:'Beleza'}[g.category])+'</p>';const wrap=document.createElement('div');wrap.className='item';wrap.append(img,label,action('Remover',async()=>{if(!confirm('Remover esta foto da galeria?'))return;const {error}=await db.from('gallery_items').delete().eq('id',g.id);if(error)message(appMessage,error.message,true);else loadGallery();},'danger'));$('galleryList').appendChild(wrap);});}
 })();
