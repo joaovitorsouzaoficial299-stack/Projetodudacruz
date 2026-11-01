@@ -10,7 +10,7 @@
 .day-switch{display:inline-flex;align-items:center;gap:9px;cursor:pointer;font-size:12px;color:var(--muted);user-select:none}.day-switch input{position:absolute;opacity:0;width:1px;height:1px}.day-switch .switch-track{position:relative;width:44px;height:24px;border-radius:20px;background:#d8c9c8;transition:background .2s;flex:none}.day-switch .switch-track:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0002;transition:transform .2s}.day-switch input:checked+.switch-track{background:var(--wine)}.day-switch input:checked+.switch-track:after{transform:translateX(20px)}.day-switch input:focus-visible+.switch-track{outline:2px solid var(--wine);outline-offset:3px}.day-switch .switch-state{min-width:58px}.modal-backdrop{position:fixed;inset:0;background:#24161999;display:none;align-items:center;justify-content:center;padding:18px;z-index:1000}.modal-backdrop.open{display:flex}.edit-modal{background:#fff;width:min(760px,100%);max-height:92vh;overflow:auto;border-radius:10px;padding:24px;box-shadow:0 20px 70px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.modal-head h2{font:25px "Playfair Display",serif;margin:0}.modal-close{border:0;background:#f3e4e5;color:var(--wine);width:36px;height:36px;border-radius:50%;font-size:22px}.edit-modal .field{margin:12px 0}@media(max-width:600px){.edit-modal{padding:17px;max-height:95vh}.modal-head h2{font-size:22px}}</style>
 </head>
 <body>
-<div id="loginView" class="shell login"><div class="panel"><div class="brand">Duda Cruz Beauty</div><div class="sub">Acesso restrito ao gerenciamento</div><h1 id="loginTitle">Entrar no painel</h1><p id="loginDescription" class="muted">Use seu usuário e senha de administrador.</p><form id="loginForm"><div class="field"><label for="adminUsername">Usuário</label><input id="adminUsername" autocomplete="username" required minlength="3" maxlength="30" placeholder="Seu usuário"></div><div class="field"><label for="adminPassword">Senha</label><input id="adminPassword" type="password" autocomplete="current-password" required minlength="10" placeholder="Sua senha"></div><button class="btn" id="loginButton" type="submit" style="width:100%">Entrar</button></form><p id="loginMessage" class="notice hidden" role="status"></p><button class="btn secondary" id="setupModeButton" type="button" style="width:100%;margin-top:8px">Primeiro acesso? Criar administrador</button></div></div>
+<div id="loginView" class="shell login"><div class="panel"><div class="brand">Duda Cruz Beauty</div><div class="sub">Acesso restrito ao gerenciamento</div><h1 id="loginTitle">Entrar no painel</h1><p id="loginDescription" class="muted">Use seu usuário e senha de administrador.</p><form id="loginForm"><div class="field hidden" id="adminEmailField"><label for="adminEmail">Gmail para confirmação</label><input id="adminEmail" type="email" autocomplete="email" placeholder="seuemail@gmail.com"></div><div class="field"><label for="adminUsername">Usuário</label><input id="adminUsername" autocomplete="username" required minlength="3" maxlength="30" placeholder="Seu usuário"></div><div class="field"><label for="adminPassword">Senha</label><input id="adminPassword" type="password" autocomplete="current-password" required minlength="10" placeholder="Sua senha"></div><button class="btn" id="loginButton" type="submit" style="width:100%">Entrar</button></form><p id="loginMessage" class="notice hidden" role="status"></p><button class="btn secondary" id="setupModeButton" type="button" style="width:100%;margin-top:8px">Primeiro acesso? Criar administrador</button></div></div>
 <div id="appView" class="shell hidden">
  <div class="topline"><div><div class="brand">Duda Cruz Beauty</div><div class="sub">Painel de gerenciamento</div></div><button class="btn secondary" id="logoutButton" type="button">Sair</button></div>
  <div class="notice">As alterações salvas aqui aparecem no site. Fotos enviadas ficam armazenadas no espaço privado de mídia do projeto e são exibidas publicamente no site.</div>
@@ -93,8 +93,10 @@
  $('setupModeButton').addEventListener('click',()=>{
   setupMode=!setupMode;
   $('loginTitle').textContent=setupMode?'Criar primeiro administrador':'Entrar no painel';
-  $('loginDescription').textContent=setupMode?'Cadastre o usuário e uma senha com pelo menos 10 caracteres. Essa opção só funciona se ainda não existir administrador.':'Use seu usuário e senha de administrador.';
-  $('loginButton').textContent=setupMode?'Criar administrador':'Entrar';
+  $('loginDescription').textContent=setupMode?'Informe seu Gmail para confirmar o cadastro. Depois, o acesso será feito com usuário e senha.':'Entre com seu usuário e senha de administrador.';
+  $('adminEmailField').classList.toggle('hidden',!setupMode);
+  $('adminEmail').required=setupMode;
+  $('loginButton').textContent=setupMode?'Enviar confirmação':'Entrar';
   $('adminPassword').autocomplete=setupMode?'new-password':'current-password';
   $('setupModeButton').textContent=setupMode?'Voltar para entrar':'Primeiro acesso? Criar administrador';
   clearMessage(loginMessage);
@@ -106,12 +108,20 @@
    if(!/^[a-z0-9._-]{3,30}$/.test(username))throw new Error('Use de 3 a 30 caracteres: letras, números, ponto, hífen ou underline.');
    if(password.length<10)throw new Error('A senha precisa ter pelo menos 10 caracteres.');
    if(setupMode){
-    const response=await fetch(edgeUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'setup',username,password})});
+    const email=$('adminEmail').value.trim().toLowerCase();
+    if(!/^[^\\s@]+@gmail\\.com$/.test(email))throw new Error('Informe um endereço Gmail válido.');
+    const response=await fetch(edgeUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'setup',email,username,password})});
     const result=await response.json().catch(()=>({}));
-    if(!response.ok||!result.success)throw new Error(result.error||'Não foi possível criar o administrador.');
-    setupMode=false;$('loginTitle').textContent='Entrar no painel';$('loginDescription').textContent='Administrador criado. Entre com seus dados.';$('loginButton').textContent='Entrar';$('setupModeButton').textContent='Primeiro acesso? Criar administrador';
+    if(!response.ok||!result.success)throw new Error(result.error||'Não foi possível iniciar o cadastro.');
+    message(loginMessage,'Cadastro iniciado! Abra o Gmail informado e confirme o endereço. Depois volte aqui e entre com seu usuário e senha.');
+    $('adminPassword').value='';
+    setupMode=false;$('loginTitle').textContent='Entrar no painel';$('loginDescription').textContent='Confirme seu Gmail e depois entre com usuário e senha.';$('adminEmailField').classList.add('hidden');$('adminEmail').required=false;$('loginButton').textContent='Entrar';$('setupModeButton').textContent='Primeiro acesso? Criar administrador';
+    return;
    }
-   const {error}=await db.auth.signInWithPassword({email:username+'@login.dudacruzbeauty.com',password});if(error)throw error;
+   const response=await fetch(edgeUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login',username,password})});
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok||!result.session)throw new Error(result.error||'Usuário ou senha inválidos.');
+   const {error}=await db.auth.setSession({access_token:result.session.access_token,refresh_token:result.session.refresh_token});if(error)throw error;
    await enterPanel();
   }catch(err){message(loginMessage,err.message||'Não foi possível entrar.',true);}
   finally{button.disabled=false;}
