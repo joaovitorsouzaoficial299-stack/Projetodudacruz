@@ -61,7 +61,6 @@
   <h2 class="section-title">Resultados e fotos</h2><p class="muted">Adicione fotos reais dos trabalhos para a galeria do site. Você poderá remover quando quiser.</p>
   <form id="galleryForm"><div class="grid">
    <div class="field"><label for="galleryTitle">Legenda (opcional)</label><input id="galleryTitle" maxlength="100"></div>
-   <div class="field"><label for="galleryCategory">Categoria</label><select id="galleryCategory"><option value="brows">Sobrancelhas</option><option value="lashes">Cílios</option><option value="beauty">Beleza</option></select></div>
    <div class="field"><label for="galleryImage">Foto</label><input id="galleryImage" type="file" accept="image/jpeg,image/png,image/webp" required></div>
   </div><button class="btn" type="submit">Enviar foto</button></form><div id="galleryList" class="list"></div>
  </section>
@@ -178,8 +177,8 @@
    host.appendChild(card);
   }
  }
- $('galleryForm').addEventListener('submit',async e=>{e.preventDefault();const file=$('galleryImage').files[0];if(!file)return;try{const image_url=await upload(file,'gallery');const {error}=await db.from('gallery_items').insert({title:$('galleryTitle').value.trim(),category:$('galleryCategory').value,image_url,active:true});if(error)throw error;$('galleryForm').reset();await loadGallery();message(appMessage,'Foto adicionada à galeria.');}catch(err){message(appMessage,'Erro ao enviar foto: '+err.message,true);}});
- async function loadGallery(){const {data,error}=await db.from('gallery_items').select('*').order('sort_order').order('created_at',{ascending:false});if(error)throw error;$('galleryList').innerHTML='';(data||[]).forEach(g=>{const img=document.createElement('img');img.className='preview';img.src=g.image_url;const label=document.createElement('div');label.innerHTML='<strong>'+escapeHtml(g.title||'Resultado')+'</strong><p>'+({brows:'Sobrancelhas',lashes:'Cílios',beauty:'Beleza'}[g.category])+'</p>';const wrap=document.createElement('div');wrap.className='item';wrap.append(img,label,action('Remover',async()=>{if(!confirm('Remover esta foto da galeria?'))return;const {error}=await db.from('gallery_items').delete().eq('id',g.id);if(error)message(appMessage,error.message,true);else loadGallery();},'danger'));$('galleryList').appendChild(wrap);});}
+ $('galleryForm').addEventListener('submit',async e=>{e.preventDefault();const file=$('galleryImage').files[0];if(!file)return;try{const image_url=await upload(file,'gallery');const {error}=await db.from('gallery_items').insert({title:$('galleryTitle').value.trim(),category:'beauty',image_url,active:true});if(error)throw error;$('galleryForm').reset();await loadGallery();message(appMessage,'Foto adicionada à galeria.');}catch(err){message(appMessage,'Erro ao enviar foto: '+err.message,true);}});
+ async function loadGallery(){const {data,error}=await db.from('gallery_items').select('*').order('sort_order').order('created_at',{ascending:false});if(error)throw error;$('galleryList').innerHTML='';(data||[]).forEach(g=>{const img=document.createElement('img');img.className='preview';img.src=g.image_url;const label=document.createElement('div');label.innerHTML='<strong>'+escapeHtml(g.title||'Resultado')+'</strong>';const wrap=document.createElement('div');wrap.className='item';wrap.append(img,label,action('Remover',async()=>{if(!confirm('Remover esta foto da galeria?'))return;const {error}=await db.from('gallery_items').delete().eq('id',g.id);if(error)message(appMessage,error.message,true);else loadGallery();},'danger'));$('galleryList').appendChild(wrap);});}
 })();
 </script>
 </body></html>
