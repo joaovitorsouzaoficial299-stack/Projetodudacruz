@@ -142,6 +142,20 @@
   const {data,error}=await db.from('services').select('*').eq('active',true).order('sort_order').order('name');
   if(error) throw error;
   services=data||[];
+  const publicGrid=document.querySelector('.service-grid');
+  if(services.length&&publicGrid){
+   const fallbackImages=[...publicGrid.querySelectorAll('img')].map(img=>img.src);
+   publicGrid.innerHTML='';
+   services.forEach((s,i)=>{
+    const card=document.createElement('article');card.className='service-card';card.dataset.serviceId=s.id;
+    const img=document.createElement('img');img.src=s.image_url||fallbackImages[i%Math.max(fallbackImages.length,1)]||'';img.alt=s.name;
+    const info=document.createElement('div');info.className='service-info';
+    const title=document.createElement('h3');title.textContent=s.name;
+    const desc=document.createElement('p');desc.textContent=s.short_description||s.description||'Conheça este procedimento.';
+    const arrow=document.createElement('span');arrow.className='arrow';
+    info.append(title,desc,arrow);card.append(img,info);publicGrid.appendChild(card);
+   });
+  }
   const host=document.getElementById('bookingServices');host.innerHTML='';
   if(!services.length){host.innerHTML='<p class="booking-hint">Os procedimentos estarão disponíveis para agendamento em breve. Se preferir, fale com a Duda pelo WhatsApp.</p>';return;}
   services.forEach(s=>{const b=document.createElement('button');b.type='button';b.className='booking-option';b.innerHTML='<strong></strong><small></small>';b.querySelector('strong').textContent=s.name;b.querySelector('small').textContent=(s.duration_minutes?s.duration_minutes+' min · ':'')+money(s.price);b.addEventListener('click',()=>{state.service=s;host.querySelectorAll('.booking-option').forEach(x=>x.classList.toggle('selected',x===b));errors[0].textContent='';});host.appendChild(b);});
@@ -214,7 +228,14 @@
   booking.close();
   alert('Solicitação registrada! A Duda poderá acompanhar seu agendamento.');
  });
+ async function loadPublicGallery(){
+  const {data,error}=await db.from('gallery_items').select('*').eq('active',true).order('sort_order').order('created_at',{ascending:false});
+  if(error||!data?.length)return;
+  const grid=document.querySelector('.gallery-grid');if(!grid)return;grid.innerHTML='';
+  data.forEach(g=>{const item=document.createElement('div');item.className='gallery-item';item.dataset.kind=g.category;const img=document.createElement('img');img.src=g.image_url;img.alt=g.title||'Resultado Duda Cruz Beauty';item.appendChild(img);grid.appendChild(item);});
+ }
  loadServices().catch(()=>{});
+ loadPublicGallery().catch(()=>{});
 })();
 </script>
 <script>const menu=document.getElementById('menu'),links=document.getElementById('links');menu.addEventListener('click',()=>links.classList.toggle('open'));links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>links.classList.remove('open')));document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.gallery-item').forEach(i=>i.classList.toggle('hide',b.dataset.filter!=='all'&&i.dataset.kind!==b.dataset.filter))}));</script></body></html>
