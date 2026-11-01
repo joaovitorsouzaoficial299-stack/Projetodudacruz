@@ -226,7 +226,9 @@
   next.disabled=false;next.textContent='Confirmar agendamento';
   if(error){errors[2].textContent=error.message?.includes('não está disponível')||error.message?.includes('reservado')?'Esse horário não está mais disponível. Volte e escolha outro.':'Não foi possível concluir. Confira os dados e tente novamente.';return;}
   booking.close();
-  alert('Solicitação registrada! A Duda poderá acompanhar seu agendamento.');
+  const phone='5562994610050';
+  const message='Olá, Duda! Gostaria de confirmar meu agendamento.\n\nNome: '+state.name+'\nProcedimento: '+state.service.name+'\nData: '+dateLabel(state.date)+'\nHorário: '+state.time+'\nDuração: '+durationLabel(state.service.duration_minutes)+'\nMeu WhatsApp: '+state.phone;
+  window.location.href='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
  });
  async function loadPublicGallery(){
   const {data,error}=await db.from('gallery_items').select('*').eq('active',true).order('sort_order').order('created_at',{ascending:false});
